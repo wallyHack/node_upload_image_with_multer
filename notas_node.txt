@@ -1,0 +1,122 @@
+
+- crea el archivo package.json con la configuración y estructura del proyecto
+npm init --yes
+
+- instalamos express
+npm i express
+
+- instalamos un motor de plantillas
+npm i ejs
+
+- módulo para cargar imagenes
+npm i multer
+
+- validaciones: la extension, el tamaño, renombrar el archivo, asignar un Id único
+
+- módulo uuid para asignar un id único
+npm i uuid
+
+- agregamos la carpeta node_modules al .gitignore
+node_modules/
+
+- instalamos un módulo llamado "nodemon" para que reinicie el servidor cuando quiera
+npm i nodemon -D
+
+- en package.json->script creamos el comando dev para correr el proyecto con babel
+"dev": "nodemon src/index.js --exec babel-node"
+
+- módulo para ver por consola las peticiones que van llegando del servidor
+npm i morgan
+
+- instalamos el módulo @babel -> traductor de código javascript
+- babeljs -> compila código viejo a código nuevo(Estándar) de javascript
+- documentación: https://babeljs.io/docs/en/usage
+
+npm install --save-dev @babel/core @babel/cli @babel/preset-env
+npm install --save @babel/polyfill
+
+- cofiguramos el archivo .babelrc
+{
+    "presets": [
+        "@babel/preset-env"
+    ]
+}
+
+- instalamos el módulo babel node -> trabaja en el servidor
+npm install --save-dev @babel/core @babel/node
+
+- en package.json->scripts creamos el comando build para traducir el código con babel
+"build": "babel src --out-dir dist"
+
+- ejecutamos la traducción de código
+npm run build
+
+- en package.json->scripts creamos el comando start para ejecutar el código final
+"start": "node dist/index.js"
+
+- ejecutamos el código final(Cuando ya esta en producción)
+npm start
+
+- creamos la estructura del proyecto
+mkdir sql -> scripts de sql
+mkdir src
+    - index.js -> arranca la aplicación
+    - app.js   -> crea el código del servidor(Configuración del servidor)
+    - mkdir routes -> rutas del servidor
+    - mkdir models -> modelos de la base de datos
+    - mkdir controllers -> funciones que llaman las rutas
+    - mkdir database -> conexión a la base de datos y/o funciones reutilizables
+
+- hacemos la configuración del servidor en el archivo app.js
+- hacemos la configuración para arrancar la aplicación en el archivo index.js
+
+>> SE VALIDA EL TAMAÑO Y TIPO DE ARCHIVO(Que se imagen) A SUBIR
+
+- configuramos el motor de plantillas
+app.set('view engine', 'ejs');
+
+- usamos el modulo path
+const path = require('path'); // une directorios
+app.set('views', path.join(__dirname, 'views'));
+
+- middlewares-> son códigos que se ejecutan antes de llegar a las rutas
+
+- realizamos la configuración de multer para almacenar los archivos
+
+// con nombre original
+
+const path = require('path');   
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: path.join(__dirname, '../public/uploads'),
+    filename: (req, file, cb) =>{
+        cb(null, file.originalname);
+    }
+});
+
+- configuramos multer para indicar el destino de las imagenes y tamaño especifico
+app.use(multer({
+    storage,
+    dest: path.join(__dirname, 'public/uploads'),
+    limits: { fileSize: 1000000 },
+    fileFilter: (req, file, cb) =>{
+        const filetypes = /jpeg|jpg|png|gif/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname));
+
+        if(mimetype && extname){
+            return cb(null, true);
+        }
+
+        // si el archivo no coincide
+        cb("error: archivo debe ser una imagen válida");
+    }
+}).single('image'));
+
+// configuramos los static files
+-> para que la carpeta pueda ser accedida desde el navegador
+
+- servicios web para subir imagenes
+cloudinary
+amazon s3
+google cloud storage
